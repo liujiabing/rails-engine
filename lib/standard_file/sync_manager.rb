@@ -1,8 +1,19 @@
 module StandardFile
   class SyncManager
 
+    attr_accessor :sync_fields
+
     def initialize(user)
       @user = user
+      raise "User must be set" unless @user
+    end
+
+    def set_sync_fields(val)
+      @sync_fields = val
+    end
+
+    def sync_fields
+      return @sync_fields || [:content, :enc_item_key, :content_type, :auth_hash, :deleted, :created_at]
     end
 
     def sync(item_hashes, options)
@@ -14,7 +25,7 @@ module StandardFile
       last_updated = DateTime.now
       saved_items, unsaved = _sync_save(item_hashes)
       if saved_items.length > 0
-        last_updated = saved_items.sort_by{|m| m.updated_at}.first.updated_at
+        last_updated = saved_items.sort_by{|m| m.updated_at}.last.updated_at
       end
 
       # manage conflicts
@@ -27,6 +38,7 @@ module StandardFile
         saved = saved_items.find{|i| i.uuid == conflicted_uuid}
         conflicted = retrieved_items.find{|i| i.uuid == conflicted_uuid}
         if (saved.updated_at - conflicted.updated_at).abs > 60
+          puts "\n\n\n Creating conflicted copy of #{saved.uuid}\n\n\n"
           dup = conflicted.dup
           dup.user = conflicted.user
           dup.save
@@ -80,6 +92,8 @@ module StandardFile
         end
 
         item.update(item_hash.permit(*permitted_params))
+        # we want to force update the updated_at field, even if no changes were made
+        # item.touch
 
         if item.deleted == true
           set_deleted(item)
@@ -126,9 +140,9 @@ module StandardFile
 
     def set_deleted(item)
       item.deleted = true
-      item.content = nil
-      item.enc_item_key = nil
-      item.auth_hash = nil
+      item.content = nil if item.has_attribute?(:content)
+      item.enc_item_key = nil if item.has_attribute?(:enc_item_key)
+      item.auth_hash = nil if item.has_attribute?(:auth_hash)
     end
 
     def item_params
@@ -136,7 +150,7 @@ module StandardFile
     end
 
     def permitted_params
-      [:content, :enc_item_key, :content_type, :auth_hash, :deleted, :created_at]
+      sync_fields
     end
 
   end
