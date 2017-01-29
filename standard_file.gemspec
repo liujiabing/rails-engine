@@ -7,11 +7,11 @@ require "standard_file/version"
 Gem::Specification.new do |s|
   s.name        = "standard-file"
   s.version     = StandardFile::VERSION
-  s.authors     = [""]
+  s.authors     = ["Standard File"]
   s.email       = ["me@bitar.io"]
   s.homepage    = "https://standardnotes.org"
   s.summary     = "Standard File User & Sync Engine"
-  s.description = "Standard File User & Sync Engine"
+  s.description = "Standard File allows for storage, sync, encryption of items such as notes, tags, and any other custom schema."
   s.license     = "GPLv3"
 
   # s.files = Dir["{app,config,db,lib}/**/*", "MIT-LICENSE", "Rakefile", "README.md"]
