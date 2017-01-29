@@ -14,12 +14,10 @@ Gem::Specification.new do |s|
   s.description = "Standard File allows for storage, sync, and encryption of items such as notes, tags, and any other models with a custom schema."
   s.license     = "GPLv3"
 
-  s.files = Dir["{lib}/**/*", "MIT-LICENSE", "Rakefile", "README.md"]
-  # s.files         = `git ls-files`.split("\n")
-  s.require_paths = ["lib"]
-
   s.add_dependency "rails", "~> 5.0.1"
   s.add_dependency 'jwt', '~> 1.5.0'
   s.add_dependency "bcrypt", '~> 3.1'
 
+  s.files = Dir["{lib}/**/*", "MIT-LICENSE", "Rakefile", "README.md"]
+  s.require_paths = ["lib"]
 end
