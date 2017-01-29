@@ -19,7 +19,7 @@ Gem::Specification.new do |s|
   s.require_paths = ["lib"]
 
   s.add_dependency "rails", "~> 5.0.1"
-  s.add_dependency 'jwt'
+  s.add_dependency 'jwt', "~> 1.5.6"
   s.add_dependency "bcrypt", '~> 3.1'
 
 end
