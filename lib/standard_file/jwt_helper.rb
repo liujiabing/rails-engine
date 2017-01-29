@@ -1,7 +1,7 @@
 module StandardFile
   module JwtHelper
-    require "JWT"
-    
+    require "jwt"
+
     def self.encode(payload)
       JWT.encode(payload, Rails.application.secrets.secret_key_base, 'HS256')
     end
