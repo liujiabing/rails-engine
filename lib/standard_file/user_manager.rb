@@ -9,7 +9,7 @@ module StandardFile
     def sign_in(email, password)
       user = @user_class.find_by_email(email)
       if user and test_password(password, user.encrypted_password)
-        return { user: user, token: jwt(user), items: user.items }
+        return { user: user, token: jwt(user) }
       else
         return {:error => {:message => "Invalid email or password.", :status => 401}}
       end
