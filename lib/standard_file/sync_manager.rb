@@ -57,6 +57,11 @@ module StandardFile
       }
     end
 
+    def destroy_items(uuids)
+      items = @user.items.where(uuid: uuids)
+      items.destroy_all
+    end
+
 
     private
 
