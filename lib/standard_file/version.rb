@@ -1,3 +1,3 @@
 module StandardFile
-  VERSION = '0.1.28'
+  VERSION = '0.1.3'
 end
