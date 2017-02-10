@@ -26,6 +26,12 @@ module StandardFile
       end
     end
 
+    def change_pw(user, password, params)
+      user.encrypted_password = hash_password(password)
+      user.update!(registration_params(params))
+      return { user: user, token: jwt(user) }
+    end
+
     def auth_params(email)
       user = @user_class.find_by_email(email)
       pw_salt = user ? Digest::SHA1.hexdigest(email + "SN" + user.pw_nonce) : Digest::SHA1.hexdigest(email + "SN" + @salt_psuedo_nonce)
@@ -53,7 +59,7 @@ module StandardFile
     end
 
     def jwt(user)
-      JwtHelper.encode({:user_uuid => user.uuid})
+      JwtHelper.encode({:user_uuid => user.uuid, :pw_hash => Digest::SHA256.hexdigest(user.encrypted_password)})
     end
 
     def registration_params(params)
