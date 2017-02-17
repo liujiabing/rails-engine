@@ -29,15 +29,17 @@ module StandardFile
       end
 
       # manage conflicts
+      min_conflict_interval = 5
+
       saved_ids = saved_items.map{|x| x.uuid }
       retrieved_ids = retrieved_items.map{|x| x.uuid }
       conflicts = saved_ids & retrieved_ids # & is the intersection
       # saved items take precedence, retrieved items are duplicated with a new uuid
       conflicts.each do |conflicted_uuid|
-        # if changes are greater than 60 seconds apart, create conflicted copy, otherwise discard conflicted
+        # if changes are greater than min_conflict_interval seconds apart, create conflicted copy, otherwise discard conflicted
         saved = saved_items.find{|i| i.uuid == conflicted_uuid}
         conflicted = retrieved_items.find{|i| i.uuid == conflicted_uuid}
-        if (saved.updated_at - conflicted.updated_at).abs > 60
+        if (saved.updated_at - conflicted.updated_at).abs > min_conflict_interval
           puts "\n\n\n Creating conflicted copy of #{saved.uuid}\n\n\n"
           dup = conflicted.dup
           dup.user = conflicted.user
