@@ -68,15 +68,21 @@ module StandardFile
     private
 
     def sync_token_from_datetime(datetime)
-      version = 1
-      Base64.encode64("#{version}:" + "#{datetime.to_i}")
+      version = 2
+      Base64.encode64("#{version}:" + "#{datetime.to_f}")
     end
 
     def datetime_from_sync_token(sync_token)
       decoded = Base64.decode64(sync_token)
       parts = decoded.rpartition(":")
       timestamp_string = parts.last
-      date = DateTime.strptime(timestamp_string,'%s')
+      version = parts.first
+      if version == "1"
+        date = DateTime.strptime(timestamp_string,'%s')
+      elsif version == "2"
+        date = Time.at(timestamp_string.to_f).to_datetime.utc
+      end
+
       return date
     end
 
