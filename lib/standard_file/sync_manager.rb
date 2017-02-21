@@ -26,10 +26,12 @@ module StandardFile
       saved_items, unsaved = _sync_save(item_hashes)
       if saved_items.length > 0
         last_updated = saved_items.sort_by{|m| m.updated_at}.last.updated_at
+        # add 1 microsecond to avoid returning same object in subsequent sync
+        last_updated = (last_updated.to_time + 1/100000.0).to_datetime.utc
       end
 
       # manage conflicts
-      min_conflict_interval = 30
+      min_conflict_interval = 20
 
       saved_ids = saved_items.map{|x| x.uuid }
       retrieved_ids = retrieved_items.map{|x| x.uuid }
