@@ -29,7 +29,7 @@ module StandardFile
       end
 
       # manage conflicts
-      min_conflict_interval = 5
+      min_conflict_interval = 30
 
       saved_ids = saved_items.map{|x| x.uuid }
       retrieved_ids = retrieved_items.map{|x| x.uuid }
