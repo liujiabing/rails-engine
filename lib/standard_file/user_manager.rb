@@ -18,7 +18,7 @@ module StandardFile
     def register(email, password, params)
       user = @user_class.find_by_email(email)
       if user
-        return {:error => {:message => "Unable to register.", :status => 401}}
+        return {:error => {:message => "This email is already registered.", :status => 401}}
       else
         user = @user_class.new(:email => email, :encrypted_password => hash_password(password))
         user.update!(registration_params(params))
