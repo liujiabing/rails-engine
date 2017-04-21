@@ -26,12 +26,10 @@ module StandardFile
       saved_items, unsaved = _sync_save(item_hashes)
       if saved_items.length > 0
         last_updated = saved_items.sort_by{|m| m.updated_at}.last.updated_at
-        # add 1 microsecond to avoid returning same object in subsequent sync
-        last_updated = (last_updated.to_time + 1/100000.0).to_datetime.utc
       end
 
       # manage conflicts
-      min_conflict_interval = 20
+      min_conflict_interval = 1
 
       saved_ids = saved_items.map{|x| x.uuid }
       retrieved_ids = retrieved_items.map{|x| x.uuid }
@@ -46,10 +44,17 @@ module StandardFile
           dup = conflicted.dup
           dup.user = conflicted.user
           dup.save
-          retrieved_items.push(dup)
+          dup_json = dup.as_json({})
+          dup_json[:conflict_of] = conflicted.uuid
+          retrieved_items.push(dup_json)
+
+          last_updated = dup.updated_at
         end
         retrieved_items.delete(conflicted)
       end
+
+      # add 1 microsecond to avoid returning same object in subsequent sync
+      last_updated = (last_updated.to_time + 1/100000.0).to_datetime.utc
 
       sync_token = sync_token_from_datetime(last_updated)
       return {
