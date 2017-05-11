@@ -17,6 +17,7 @@ module StandardFile
     end
 
     def sync(item_hashes, options)
+
       in_sync_token = options[:sync_token]
       in_cursor_token = options[:cursor_token]
       limit = options[:limit]
@@ -28,7 +29,23 @@ module StandardFile
         last_updated = saved_items.sort_by{|m| m.updated_at}.last.updated_at
       end
 
-      # manage conflicts
+      last_updated = check_for_conflicts(saved_items, retrieved_items, last_updated)
+
+      # add 1 microsecond to avoid returning same object in subsequent sync
+      last_updated = (last_updated.to_time + 1/100000.0).to_datetime.utc
+
+      sync_token = sync_token_from_datetime(last_updated)
+      return {
+        :retrieved_items => retrieved_items,
+        :saved_items => saved_items,
+        :unsaved => unsaved,
+        :sync_token => sync_token,
+        :cursor_token => cursor_token
+      }
+    end
+
+    def check_for_conflicts(saved_items, retrieved_items, last_updated)
+      # conflicts occur when you are trying to save an item for which there is a pending change already
       min_conflict_interval = 20
 
       saved_ids = saved_items.map{|x| x.uuid }
@@ -53,17 +70,7 @@ module StandardFile
         retrieved_items.delete(conflicted)
       end
 
-      # add 1 microsecond to avoid returning same object in subsequent sync
-      last_updated = (last_updated.to_time + 1/100000.0).to_datetime.utc
-
-      sync_token = sync_token_from_datetime(last_updated)
-      return {
-        :retrieved_items => retrieved_items,
-        :saved_items => saved_items,
-        :unsaved => unsaved,
-        :sync_token => sync_token,
-        :cursor_token => cursor_token
-      }
+      return last_updated
     end
 
     def destroy_items(uuids)
