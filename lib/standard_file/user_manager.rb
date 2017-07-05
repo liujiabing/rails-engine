@@ -32,14 +32,29 @@ module StandardFile
       return { user: user, token: jwt(user) }
     end
 
+    def update(user, params)
+      user.update!(registration_params(params))
+      return { user: user, token: jwt(user) }
+    end
+
     def auth_params(email)
       user = @user_class.find_by_email(email)
-      pw_salt = user ? Digest::SHA1.hexdigest(email + "SN" + user.pw_nonce) : Digest::SHA1.hexdigest(email + "SN" + @salt_psuedo_nonce)
-      pw_cost = user ? user.pw_cost : 5000
-      pw_alg = user ? user.pw_alg : "sha512"
-      pw_key_size = user ? user.pw_key_size : 512
-      pw_func = user ? user.pw_func : "pbkdf2"
-      return {:pw_func => pw_func, :pw_alg => pw_alg, :pw_salt => pw_salt, :pw_cost => pw_cost, :pw_key_size => pw_key_size}
+
+      if !user
+        return {}
+      end
+
+      pw_salt = user.pw_salt ? user.pw_salt : Digest::SHA1.hexdigest(email + "SN" + user.pw_nonce)
+
+      auth_params = {:pw_salt => pw_salt, :pw_cost => user.pw_cost, :pw_auth => user.pw_auth}
+
+      if user.pw_func
+        auth_params[:pw_func] = user.pw_func
+        auth_params[:pw_alg] = user.pw_alg
+        auth_params[:pw_key_size] = user.pw_key_size
+      end
+
+      return auth_params
     end
 
     private
@@ -63,7 +78,7 @@ module StandardFile
     end
 
     def registration_params(params)
-      params.permit(:pw_func, :pw_alg, :pw_cost, :pw_key_size, :pw_nonce)
+      params.permit(:pw_func, :pw_alg, :pw_cost, :pw_key_size, :pw_nonce, :pw_salt, :pw_auth)
     end
 
   end
