@@ -43,10 +43,8 @@ module StandardFile
       if !user
         return {}
       end
-
-      pw_salt = user.pw_salt ? user.pw_salt : Digest::SHA1.hexdigest(email + "SN" + user.pw_nonce)
-
-      auth_params = {:pw_salt => pw_salt, :pw_cost => user.pw_cost, :pw_auth => user.pw_auth}
+      
+      auth_params = {:pw_salt => user.pw_salt, :pw_cost => user.pw_cost, :pw_auth => user.pw_auth}
 
       if user.pw_func
         auth_params[:pw_func] = user.pw_func
