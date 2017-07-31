@@ -24,12 +24,12 @@ module StandardFile
 
       retrieved_items, cursor_token = _sync_get(in_sync_token, in_cursor_token, limit).to_a
       last_updated = DateTime.now
-      saved_items, unsaved = _sync_save(item_hashes)
+      saved_items, unsaved_items = _sync_save(item_hashes)
       if saved_items.length > 0
         last_updated = saved_items.sort_by{|m| m.updated_at}.last.updated_at
       end
 
-      last_updated = check_for_conflicts(saved_items, retrieved_items, last_updated)
+      check_for_conflicts(saved_items, retrieved_items, unsaved_items)
 
       # add 1 microsecond to avoid returning same object in subsequent sync
       last_updated = (last_updated.to_time + 1/100000.0).to_datetime.utc
@@ -38,13 +38,13 @@ module StandardFile
       return {
         :retrieved_items => retrieved_items,
         :saved_items => saved_items,
-        :unsaved => unsaved,
+        :unsaved => unsaved_items,
         :sync_token => sync_token,
         :cursor_token => cursor_token
       }
     end
 
-    def check_for_conflicts(saved_items, retrieved_items, last_updated)
+    def check_for_conflicts(saved_items, retrieved_items, unsaved_items)
       # conflicts occur when you are trying to save an item for which there is a pending change already
       min_conflict_interval = 20
 
@@ -53,24 +53,21 @@ module StandardFile
       conflicts = saved_ids & retrieved_ids # & is the intersection
       # saved items take precedence, retrieved items are duplicated with a new uuid
       conflicts.each do |conflicted_uuid|
-        # if changes are greater than min_conflict_interval seconds apart, create conflicted copy, otherwise discard conflicted
+        # if changes are greater than min_conflict_interval seconds apart,
+        # push the retrieved item in the unsaved array so that the client can duplicate it
         saved = saved_items.find{|i| i.uuid == conflicted_uuid}
         conflicted = retrieved_items.find{|i| i.uuid == conflicted_uuid}
         if (saved.updated_at - conflicted.updated_at).abs > min_conflict_interval
-          puts "\n\n\n Creating conflicted copy of #{saved.uuid}\n\n\n"
-          dup = conflicted.dup
-          dup.user = conflicted.user
-          dup.save
-          dup_json = dup.as_json({})
-          dup_json[:conflict_of] = conflicted.uuid
-          retrieved_items.push(dup_json)
+          # puts "\n\n\n Creating conflicted copy of #{saved.uuid}\n\n\n"
 
-          last_updated = dup.updated_at
+          unsaved_items.push({
+            :item => conflicted,
+            :error => {:tag => "sync_conflict"}
+          })
+
+          retrieved_items.delete(conflicted)
         end
-        retrieved_items.delete(conflicted)
       end
-
-      return last_updated
     end
 
     def destroy_items(uuids)
