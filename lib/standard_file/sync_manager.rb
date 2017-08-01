@@ -65,8 +65,8 @@ module StandardFile
             :error => {:tag => "sync_conflict"}
           })
 
-          retrieved_items.delete(conflicted)
         end
+        retrieved_items.delete(conflicted)
       end
     end
 
