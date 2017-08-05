@@ -41,10 +41,15 @@ module StandardFile
       user = @user_class.find_by_email(email)
 
       if !user
-        return {}
+        return nil
       end
-      
-      auth_params = {:pw_salt => user.pw_salt, :pw_cost => user.pw_cost, :pw_auth => user.pw_auth}
+
+      auth_params = {
+        :pw_salt => user.pw_salt,
+        :pw_cost => user.pw_cost,
+        :pw_auth => user.pw_auth,
+        :version => user.version
+      }
 
       if user.pw_func
         auth_params[:pw_func] = user.pw_func
@@ -76,7 +81,7 @@ module StandardFile
     end
 
     def registration_params(params)
-      params.permit(:pw_func, :pw_alg, :pw_cost, :pw_key_size, :pw_nonce, :pw_salt, :pw_auth)
+      params.permit(:pw_func, :pw_alg, :pw_cost, :pw_key_size, :pw_nonce, :pw_salt, :pw_auth, :version)
     end
 
   end
