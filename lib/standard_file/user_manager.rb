@@ -47,7 +47,6 @@ module StandardFile
       auth_params = {
         :pw_salt => user.pw_salt,
         :pw_cost => user.pw_cost,
-        :pw_auth => user.pw_auth,
         :version => user.version
       }
 
@@ -81,7 +80,7 @@ module StandardFile
     end
 
     def registration_params(params)
-      params.permit(:pw_func, :pw_alg, :pw_cost, :pw_key_size, :pw_nonce, :pw_salt, :pw_auth, :version)
+      params.permit(:pw_func, :pw_alg, :pw_cost, :pw_key_size, :pw_nonce, :pw_salt, :version)
     end
 
   end
