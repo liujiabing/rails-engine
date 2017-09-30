@@ -48,6 +48,10 @@ module StandardFile
       # conflicts occur when you are trying to save an item for which there is a pending change already
       min_conflict_interval = 20
 
+      if Rails.env.development?
+        min_conflict_interval = 5
+      end
+
       saved_ids = saved_items.map{|x| x.uuid }
       retrieved_ids = retrieved_items.map{|x| x.uuid }
       conflicts = saved_ids & retrieved_ids # & is the intersection
@@ -66,6 +70,10 @@ module StandardFile
           })
 
         end
+
+        # We remove the item from retrieved items whether or not it satisfies the min_conflict_interval
+        # This is because the 'saved' value takes precedence, since that's the current value in the database.
+        # So by removing it from retrieved, we are forcing the client to ignore this change.
         retrieved_items.delete(conflicted)
       end
     end
