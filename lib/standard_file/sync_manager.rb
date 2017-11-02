@@ -16,7 +16,7 @@ module StandardFile
       return @sync_fields || [:content, :enc_item_key, :content_type, :auth_hash, :deleted, :created_at]
     end
 
-    def sync(item_hashes, options)
+    def sync(item_hashes, options, request)
 
       in_sync_token = options[:sync_token]
       in_cursor_token = options[:cursor_token]
@@ -24,7 +24,7 @@ module StandardFile
 
       retrieved_items, cursor_token = _sync_get(in_sync_token, in_cursor_token, limit).to_a
       last_updated = DateTime.now
-      saved_items, unsaved_items = _sync_save(item_hashes)
+      saved_items, unsaved_items = _sync_save(item_hashes, request)
       if saved_items.length > 0
         last_updated = saved_items.sort_by{|m| m.updated_at}.last.updated_at
       end
@@ -49,7 +49,7 @@ module StandardFile
       min_conflict_interval = 20
 
       if Rails.env.development?
-        min_conflict_interval = 5
+        min_conflict_interval = 1
       end
 
       saved_ids = saved_items.map{|x| x.uuid }
@@ -105,7 +105,7 @@ module StandardFile
       return date
     end
 
-    def _sync_save(item_hashes)
+    def _sync_save(item_hashes, request)
       if !item_hashes
         return [], []
       end
@@ -123,9 +123,11 @@ module StandardFile
           next
         end
 
+        item.last_user_agent = request.user_agent
         item.update(item_hash.permit(*permitted_params))
         # we want to force update the updated_at field, even if no changes were made
         # item.touch
+
 
         if item.deleted == true
           set_deleted(item)
