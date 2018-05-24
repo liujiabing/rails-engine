@@ -47,6 +47,7 @@ module StandardFile
       auth_params = {
         :pw_salt => user.pw_salt,
         :pw_cost => user.pw_cost,
+        :pw_nonce => user.pw_nonce,
         :version => user.version
       }
 

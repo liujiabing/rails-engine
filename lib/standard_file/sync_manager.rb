@@ -158,7 +158,8 @@ module StandardFile
         date = datetime_from_sync_token(sync_token)
         items = @user.items.order(:updated_at).where("updated_at > ?", date)
       else
-        items = @user.items.order(:updated_at)
+        # if no cursor token and no sync token, this is an initial sync. No need to return deleted items.
+        items = @user.items.order(:updated_at).where(:deleted => false)
       end
 
       items = items.sort_by{|m| m.updated_at}
