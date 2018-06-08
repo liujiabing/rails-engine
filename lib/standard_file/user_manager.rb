@@ -1,9 +1,8 @@
 module StandardFile
   class UserManager
 
-    def initialize(user_class, salt_psuedo_nonce)
+    def initialize(user_class)
       @user_class = user_class
-      @salt_psuedo_nonce = salt_psuedo_nonce
     end
 
     def sign_in(email, password)
@@ -45,6 +44,7 @@ module StandardFile
       end
 
       auth_params = {
+        :identifier => user.email,
         :pw_salt => user.pw_salt,
         :pw_cost => user.pw_cost,
         :pw_nonce => user.pw_nonce,
