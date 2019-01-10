@@ -21,8 +21,9 @@ module StandardFile
       in_sync_token = options[:sync_token]
       in_cursor_token = options[:cursor_token]
       limit = options[:limit]
+      content_type = options[:content_type] # optional, only return items of these type if present
 
-      retrieved_items, cursor_token = _sync_get(in_sync_token, in_cursor_token, limit).to_a
+      retrieved_items, cursor_token = _sync_get(in_sync_token, in_cursor_token, limit, content_type).to_a
       last_updated = DateTime.now
       saved_items, unsaved_items = _sync_save(item_hashes, request)
       if saved_items.length > 0
@@ -140,7 +141,7 @@ module StandardFile
       return saved_items, unsaved
     end
 
-    def _sync_get(sync_token, input_cursor_token, limit)
+    def _sync_get(sync_token, input_cursor_token, limit, content_type)
       cursor_token = nil
       if limit == nil
         limit = 100000
@@ -160,6 +161,10 @@ module StandardFile
       else
         # if no cursor token and no sync token, this is an initial sync. No need to return deleted items.
         items = @user.items.order(:updated_at).where(:deleted => false)
+      end
+
+      if content_type
+        items = items.where(:content_type => content_type)
       end
 
       items = items.sort_by{|m| m.updated_at}
