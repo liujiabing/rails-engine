@@ -45,13 +45,18 @@ module StandardFile
 
       auth_params = {
         :identifier => user.email,
-        :pw_salt => user.pw_salt,
         :pw_cost => user.pw_cost,
         :pw_nonce => user.pw_nonce,
         :version => user.version
       }
 
+      if user.pw_salt
+        #v002 only
+        auth_params[:pw_salt] = user.pw_salt
+      end
+
       if user.pw_func
+        #v001 only
         auth_params[:pw_func] = user.pw_func
         auth_params[:pw_alg] = user.pw_alg
         auth_params[:pw_key_size] = user.pw_key_size
