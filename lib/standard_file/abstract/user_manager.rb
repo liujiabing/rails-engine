@@ -1,5 +1,5 @@
 module StandardFile
-  class UserManager
+  class AbstractUserManager
 
     def initialize(user_class)
       @user_class = user_class
