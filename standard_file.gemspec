@@ -12,11 +12,11 @@ Gem::Specification.new do |s|
   s.homepage    = "https://standardnotes.org"
   s.summary     = "Standard File User & Sync Engine"
   s.description = "Standard File allows for storage, sync, and encryption of items such as notes, tags, and any other models with a custom schema."
-  s.license     = "GPLv3"
+  s.license     = "GPL-3.0"
 
-  s.add_dependency "rails", "~> 5.0.1"
-  s.add_dependency 'jwt', '~> 1.5.0'
-  s.add_dependency "bcrypt", '~> 3.1'
+  s.add_dependency "rails"
+  s.add_dependency 'jwt'
+  s.add_dependency "bcrypt"
 
   s.files = Dir["{lib}/**/*", "MIT-LICENSE", "Rakefile", "README.md"]
   s.require_paths = ["lib"]
