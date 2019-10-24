@@ -78,7 +78,7 @@ module StandardFile
     def test_password(password, hash)
       bcrypt = BCrypt::Password.new(hash)
       password = BCrypt::Engine.hash_secret(password, bcrypt.salt)
-      return password == hash
+      return ActiveSupport::SecurityUtils.secure_compare(password, hash)
     end
 
     def jwt(user)
